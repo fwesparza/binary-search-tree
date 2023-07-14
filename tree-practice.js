@@ -68,7 +68,6 @@ function getHeight(rootNode) {
  * balancedTree()
  *
  * a 'height balanced binary tree' is a binary tree in which the following are true:
- *
  * 1) the height of it's left & right subtree differs by at most 1
  * 2) it's left & right subtrees are 'balanced'
  *
@@ -108,12 +107,63 @@ function countNodes(rootNode) {
   return nodesCount;
 }
 
+/**
+ * getParentNode()
+ *
+ * @returns null if value of rootNode equals target
+ * @returns value of parent node
+ * uses a depth first traversal to have access to parent node in each iteration
+ */
 function getParentNode(rootNode, target) {
-  // Your code here
+  if (rootNode.val === target) return null;
+  let stack = [rootNode];
+
+  while (stack.length > 0) {
+    let curr = stack.pop();
+
+    if (curr.left) {
+      if (curr.left.val === target) return curr;
+      stack.push(curr.left);
+    }
+    if (curr.right) {
+      if (curr.right.val === target) return curr;
+      stack.push(curr.right);
+    }
+  }
 }
 
+/**
+ * @rootNode of a binary tree (not necessarily a binary search tree)
+ *
+ * @returns 'null' if target is 1st value in in-order traversal
+ * @returns value BEFORE target otherwise
+ */
 function inOrderPredecessor(rootNode, target) {
-  // Your code here
+  // if target is the min of in-order traversal, return null since it has no predecessor
+  if (findMinBT(rootNode) === target) return null;
+
+  // find  target node
+  let targetNode = null;
+  let stack = [rootNode];
+
+  while (stack.length > 0) {
+    let curr = stack.pop();
+
+    if (curr.val === target) {
+      targetNode = curr;
+    } else {
+      if (curr.left) stack.push(curr.left);
+      if (curr.right) stack.push(curr.right);
+    }
+  }
+
+  // if  target node has a left subtree
+  // the predecessor will be the max of the left subtree
+  if (targetNode.left) return findMaxBT(targetNode.left);
+
+  // else, target node must only have a right subtree
+  // therefore, preducessor will by the parent of the target node
+  else return getParentNode(rootNode, target).val;
 }
 
 function deleteNodeBST(rootNode, target) {
