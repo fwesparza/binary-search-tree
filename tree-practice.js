@@ -133,13 +133,15 @@ function getParentNode(rootNode, target) {
 }
 
 /**
- * @rootNode of a binary tree (not necessarily a binary search tree)
+ * inOrderPredecessor()
  *
+ * @rootNode of a binary tree (not necessarily a binary search tree)
  * @returns 'null' if target is 1st value in in-order traversal
  * @returns value BEFORE target otherwise
  */
 function inOrderPredecessor(rootNode, target) {
-  // if target is the min of in-order traversal, return null since it has no predecessor
+  // if target is the min of in-order traversal,
+  // return null since it has no predecessor
   if (findMinBT(rootNode) === target) return null;
 
   // find  target node
@@ -166,27 +168,90 @@ function inOrderPredecessor(rootNode, target) {
   else return getParentNode(rootNode, target).val;
 }
 
+/**
+ * @return 'undefined' if target is not in tree
+ *
+ * 1) deletes leaves (nodes without children) - set parents pointer to 'null'
+ * 2) deletes nodes with 1 child - replace node with child
+ * 3) deleted nodes with 2 children:
+ *    a) replace target node value with in-order-predecessor or sucessor
+ *    b) delete in-order predecessor or sucessor
+ *
+ */
 function deleteNodeBST(rootNode, target) {
   // Do a traversal to find the node. Keep track of the parent
+  let targetNode = null;
+  let parentNode = null;
+  let stack = [rootNode];
+
+  while (stack.length > 0) {
+    let curr = stack.pop();
+
+    if (curr.val === target) {
+      targetNode = curr;
+      parentNode = getParentNode(rootNode, target);
+    } else {
+      if (curr.left) stack.push(curr.left);
+      if (curr.right) stack.push(curr.right);
+    }
+  }
 
   // Undefined if the target cannot be found
+  if (!targetNode) return undefined;
 
-  // Set target based on parent
 
-  // Case 0: Zero children and no parent:
-  //   return null
+  /**************
+   * NO CHILDREN
+   * ************
+   */
+  if (!targetNode.left && !targetNode.right) {
+    // Case 0: Zero children and no parent:
+    //   return null
+    if (!parentNode) return null;
 
-  // Case 1: Zero children:
-  //   Set the parent that points to it to null
+    // Case 1: Zero children:
+    //   Set the parent that points to it to null
+    if (parentNode.left.val === target) parentNode.left = null;
+    else parentNode.right = null;
+  }
 
-  // Case 2: Two children:
-  //  Set the value to its in-order predecessor, then delete the predecessor
-  //  Replace target node with the left most child on its right side,
-  //  or the right most child on its left side.
-  //  Then delete the child that it was replaced with.
+  /**************
+   * 2 CHILDREN
+   * ************
+   */
+  if (targetNode.left && targetNode.right) {
+    // Case 2: Two children:
+    //  Set the value to its in-order predecessor, then delete the predecessor
+    let inOrderPredecessor = inOrderPredecessor(rootNode, target);
+    target.val = inOrderPredecessor;
+    deleteNodeBST(rootNode, inOrderPredecessor);
 
+    //  Replace target node with the left most child on its right side,
+    //  or the right most child on its left side.
+    //  Then delete the child that it was replaced with.
+
+  }
+
+  /*********
+  * 1 CHILD
+  * ********
+  */
   // Case 3: One child:
   //   Make the parent point to the child
+
+  // if parent's right pointer points to target
+  if (parentNode.right) {
+    if (parentNode.right.val === target) {
+      if (targetNode.right) parentNode.right = targetNode.right;
+      else parentNode.right = targetNode.left;
+    }
+
+    // else, parent's left pointer must point to target
+    else {
+      if (targetNode.right) parentNode.left = targetNode.right;
+      else parentNode.left = targetNode.left;
+    }
+  }
 
 }
 
